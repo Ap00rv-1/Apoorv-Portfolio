@@ -29,10 +29,23 @@
       overflow-x: hidden;
     }
 
-    #vanta-bg {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      opacity: 1; transition: opacity 0.26s ease;
-      background: var(--bg);
+    #bg-blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(70px); opacity: 0.32;
+      will-change: transform;
+      transition: background-color 1.1s ease;
+    }
+    .blob-a { width: 46vw; height: 46vw; top: -12%; left: -10%; background: #6366F1; animation: floatA 24s ease-in-out infinite; }
+    .blob-b { width: 38vw; height: 38vw; bottom: -14%; right: -8%;  background: #EC4899; animation: floatB 28s ease-in-out infinite; }
+    .blob-c { width: 30vw; height: 30vw; top: 42%; left: 55%;      background: #93C5FD; animation: floatC 32s ease-in-out infinite; }
+    @keyframes floatA { 0%,100% { transform: translate(0,0) scale(1); }    50% { transform: translate(4vw,6vw) scale(1.08); } }
+    @keyframes floatB { 0%,100% { transform: translate(0,0) scale(1); }    50% { transform: translate(-5vw,-4vw) scale(0.94); } }
+    @keyframes floatC { 0%,100% { transform: translate(0,0) scale(1); }    50% { transform: translate(-4vw,5vw) scale(1.1); } }
+    /* faint static grain — one-time render, zero animation cost */
+    #bg-grain {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     /* ══ NAV ══ */
@@ -338,7 +351,12 @@
 
 <!-- scroll progress -->
 <div id="scroll-bar"></div>
-<div id="vanta-bg"></div>
+<div id="bg-blobs">
+  <div class="blob blob-a" id="blob-a"></div>
+  <div class="blob blob-b" id="blob-b"></div>
+  <div class="blob blob-c" id="blob-c"></div>
+</div>
+<div id="bg-grain"></div>
 
 <!-- NAV -->
 <nav>
@@ -691,133 +709,46 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════
-   VANTA.JS COSMIC SCROLL BACKGROUND (GPU / WebGL)
-   Each section swaps in a different Vanta effect as it scrolls
-   into view. Scripts are lazy-loaded on demand (not all 8 up
-   front), the old WebGL context is destroyed before the next
-   one is created, the whole thing pauses when the tab isn't
-   visible, and it's skipped entirely for prefers-reduced-motion.
+   LIGHTWEIGHT BACKGROUND — CSS does the animating (compositor
+   thread, basically free). JS only swaps 3 colors on scroll.
+   No canvas loop, no WebGL, no external library, no lag.
    ══════════════════════════════════════════════════════════ */
-
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = window.innerWidth < 760;
+if (reduceMotion) document.getElementById('bg-blobs').style.display = 'none';
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-const THREE_SRC  = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js';
-const VANTA_BASE = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.';
-
-/* Section → Vanta effect. Story arc: calm start, a "birth" moment
-   for About, then each section gets a visual metaphor for its content. */
-const EFFECTS = {
-  hero:       { name: 'FOG',    file: 'fog.min.js'    },
-  about:      { name: 'HALO',   file: 'halo.min.js'   }, // Big Bang — radiating shockwave
-  projects:   { name: 'GLOBE',  file: 'globe.min.js'  }, // planets
-  skills:     { name: 'NET',    file: 'net.min.js'    }, // constellation of nodes
-  experience: { name: 'WAVES',  file: 'waves.min.js'  }, // forward motion / timeline
-  por:        { name: 'RINGS',  file: 'rings.min.js'  }, // orbiting rings — leadership
-  beyond:     { name: 'CLOUDS', file: 'clouds.min.js' }, // soft creative nebula
-  contact:    { name: 'BIRDS',  file: 'birds.min.js'  }, // flock converging — reach out
+const SCENE_COLORS = {
+  hero:       ['#6366F1', '#EC4899', '#93C5FD'],
+  about:      ['#F59E0B', '#EC4899', '#6366F1'],
+  projects:   ['#6366F1', '#3B82F6', '#10B981'],
+  skills:     ['#6366F1', '#10B981', '#3B82F6'],
+  experience: ['#3B82F6', '#F59E0B', '#EC4899'],
+  por:        ['#EC4899', '#6366F1', '#F59E0B'],
+  beyond:     ['#EC4899', '#A78BFA', '#F59E0B'],
+  contact:    ['#F59E0B', '#EC4899', '#6366F1'],
 };
+const blobA = document.getElementById('blob-a');
+const blobB = document.getElementById('blob-b');
+const blobC = document.getElementById('blob-c');
 
-/* Colors pulled from the site's own accent palette so nothing clashes
-   or "punches" — the effect IS the accent, not a foreign color. */
-const OPTIONS = {
-  hero:       { highlightColor: 0x6366f1, midtoneColor: 0xa5b4fc, lowlightColor: 0xf0f4ff, baseColor: 0xf0f4ff, blurFactor: 0.62, speed: 1.0, zoom: 1.1 },
-  about:      { baseColor: 0xf59e0b, backgroundColor: 0xf0f4ff, amplitudeFactor: 1.7, size: 1.3, xOffset: 0, yOffset: 0.1 },
-  projects:   { color: 0x6366f1, color2: 0x3b82f6, backgroundColor: 0xf0f4ff, size: 1.0 },
-  skills:     { color: 0x6366f1, backgroundColor: 0xf0f4ff, points: 9.0, maxDistance: 20.0, spacing: 18.0, showDots: true },
-  experience: { color: 0x3b82f6, backgroundColor: 0xf0f4ff, waveHeight: 15, waveSpeed: 0.85, zoom: 0.75, shininess: 25 },
-  por:        { backgroundColor: 0xf0f4ff, color: 0xec4899 },
-  beyond:     { skyColor: 0xe7e4ff, cloudColor: 0xd9c7e8, cloudShadowColor: 0xb9a3cc, sunColor: 0xf59e0b, sunlightColor: 0xf9c9d6, speed: 0.75 },
-  contact:    { backgroundColor: 0xf0f4ff, color1: 0x6366f1, color2: 0xec4899, birdSize: 1.0, wingSpan: 24, speedLimit: 4, separation: 42, alignment: 28, cohesion: 28, quantity: 3 },
-};
-
-/* Lighten resource use on phones — fewer points/birds, same visual idea */
-function mobileAdjust(id, opts) {
-  if (!isMobile) return opts;
-  const o = { ...opts, scaleMobile: 0.85 };
-  if (id === 'skills')  { o.points = 6.0; o.maxDistance = 16.0; }
-  if (id === 'contact') { o.quantity = 2; }
-  return o;
+function setScene(id) {
+  const c = SCENE_COLORS[id];
+  if (!c || !blobA) return;
+  blobA.style.backgroundColor = c[0];
+  blobB.style.backgroundColor = c[1];
+  blobC.style.backgroundColor = c[2];
 }
-
-let currentEffect = null;
-let currentId = null;
-const loadedEffectFiles = new Set();
-const vantaBg = document.getElementById('vanta-bg');
-
-async function activateScene(id) {
-  if (reduceMotion || id === currentId) return;
-  currentId = id;
-  vantaBg.style.opacity = '0';
-
-  try {
-    await loadScript(THREE_SRC);
-    const eff = EFFECTS[id];
-    if (!loadedEffectFiles.has(eff.file)) {
-      await loadScript(VANTA_BASE + eff.file);
-      loadedEffectFiles.add(eff.file);
-    }
-  } catch (err) {
-    vantaBg.style.opacity = '1';
-    return; // CDN unreachable — fail quietly, keep flat background
-  }
-
-  // if the user scrolled past this section again before load finished, bail
-  if (id !== currentId) return;
-
-  setTimeout(() => {
-    if (id !== currentId) return; // re-check after the fade delay too
-    if (currentEffect) { try { currentEffect.destroy(); } catch (e) {} }
-    const eff = EFFECTS[id];
-    if (window.VANTA && window.VANTA[eff.name]) {
-      currentEffect = window.VANTA[eff.name]({
-        el: '#vanta-bg',
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
-        scale: 1.0,
-        scaleMobile: 1.0,
-        ...mobileAdjust(id, OPTIONS[id]),
-      });
-    }
-    vantaBg.style.opacity = '1';
-  }, 260);
-}
-
-/* pause the WebGL render loop when the tab isn't visible — saves battery */
-document.addEventListener('visibilitychange', () => {
-  if (!currentEffect) return;
-  try {
-    if (document.hidden) currentEffect.pauseAnimation && currentEffect.pauseAnimation();
-    else currentEffect.resumeAnimation && currentEffect.resumeAnimation();
-  } catch (e) {}
-});
 
 const sectionIds = ['hero','about','projects','skills','experience','por','beyond','contact'];
 const sceneObserver = new IntersectionObserver(entries => {
   entries.forEach(e => {
-    if (e.isIntersecting && e.intersectionRatio > 0.35) activateScene(e.target.id);
+    if (e.isIntersecting && e.intersectionRatio > 0.35) setScene(e.target.id);
   });
 }, { threshold: [0.35, 0.5, 0.65] });
 sectionIds.forEach(id => {
   const el = document.getElementById(id);
   if (el) sceneObserver.observe(el);
 });
-
-if (!reduceMotion) activateScene('hero');
+setScene('hero');
 
 /* ══ SCROLL PROGRESS BAR ══ */
 const scrollBar = document.getElementById('scroll-bar');
@@ -834,10 +765,9 @@ const revealObs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
 /* ══ SIZE-SHIFT ON SCROLL ══
-   Elements near the vertical center of the viewport sit at full size;
-   elements further away shrink slightly. Driven by scroll/resize events
-   + rAF batching (not a free-running per-frame loop), and skips elements
-   that are far off-screen — no layout thrashing, no idle battery drain. */
+   Elements near the vertical center sit at full size; further away,
+   slightly smaller. Driven by scroll/resize + rAF batching, skips
+   off-screen elements — cheap, no idle loop. */
 const scaleTargets = Array.from(document.querySelectorAll('.reveal'));
 let sizeShiftScheduled = false;
 
@@ -845,10 +775,10 @@ function updateSizeShift() {
   const vh = window.innerHeight, center = vh / 2;
   scaleTargets.forEach(el => {
     const rect = el.getBoundingClientRect();
-    if (rect.bottom < -200 || rect.top > vh + 200) return; // off-screen, skip
+    if (rect.bottom < -200 || rect.top > vh + 200) return;
     const elCenter = rect.top + rect.height / 2;
     const norm = Math.min(1, Math.abs(elCenter - center) / (vh * 0.75));
-    const scale = 1.025 - norm * 0.08; // ~0.945 to 1.025, subtle
+    const scale = 1.025 - norm * 0.08;
     el.style.setProperty('--rs', scale.toFixed(3));
   });
   sizeShiftScheduled = false;
