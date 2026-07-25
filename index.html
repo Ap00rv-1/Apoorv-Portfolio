@@ -299,8 +299,11 @@
     }
 
     /* ══ REVEAL ══ */
-    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal {
+      opacity: 0; transform: translateY(22px) scale(var(--rs, 1));
+      transition: opacity 0.55s ease, transform 0.18s linear;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0) scale(var(--rs, 1)); }
 
     /* ══ SCROLL PROGRESS BAR ══ */
     #scroll-bar {
@@ -683,182 +686,341 @@
 <footer>Apoorv Singh · IIT Indore · Built with code & caffeine</footer>
 
 <script>
-/* ══ BUBBLE + PARTICLE BACKGROUND — light theme ══ */
+/* ══════════════════════════════════════════════════════════
+   COSMIC SCROLL BACKGROUND
+   Each section owns a "scene": Hero=Starfield, About=Big Bang,
+   Projects=Planets, Skills=Constellation, Experience=Meteors,
+   POR=Orbit Rings, Beyond=Nebula, Contact=Converge.
+   Colors stay soft (no neon) — contrast comes from the SHAPE
+   of the animation changing per section, not harsh hues.
+   ══════════════════════════════════════════════════════════ */
 const canvas = document.getElementById('bg-canvas');
 const ctx    = canvas.getContext('2d');
 let W, H;
-let mouse = { x: -999, y: -999 };
 
 function resize() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', () => { resize(); initAll(); });
-window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-
-/* Soft pastel palette — eye-friendly */
-const PALETTE = [
-  { h:240, s:65, l:72 },  // soft indigo
-  { h:330, s:60, l:75 },  // soft rose
-  { h:160, s:50, l:65 },  // soft emerald
-  { h:200, s:58, l:68 },  // soft sky
-  { h:280, s:52, l:73 },  // soft violet
-  { h:40,  s:75, l:70 },  // soft amber
-];
-function randColor() {
-  const c = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-  return { h: c.h, s: c.s, l: c.l };
+  initStars();
+  initConst();
+  if (currentScene === 'projects')  initPlanets();
+  if (currentScene === 'contact')   initConverge();
 }
 
-/* ── BUBBLES ── */
-class Bubble {
-  constructor() { this.init(true); }
-  init(first = false) {
-    this.x       = Math.random() * W;
-    this.y       = first ? Math.random() * H : H + 60;
-    this.baseR   = Math.random() * 36 + 12;
-    this.r       = this.baseR;
-    this.vx      = (Math.random() - 0.5) * 0.35;
-    this.vy      = -(Math.random() * 0.45 + 0.12);
-    this.color   = randColor();
-    this.alpha   = Math.random() * 0.14 + 0.05;
-    this.phase   = Math.random() * Math.PI * 2;
-    this.pSpeed  = Math.random() * 0.016 + 0.007;
-    this.life    = 1;
-    this.decay   = Math.random() * 0.0007 + 0.0003;
-  }
-  update() {
-    const dx = this.x - mouse.x, dy = this.y - mouse.y;
-    const d  = Math.sqrt(dx*dx + dy*dy);
-    if (d < 130) { this.vx += (dx/d)*0.08; this.vy += (dy/d)*0.05; }
-    this.x     += this.vx;
-    this.y     += this.vy;
-    this.phase += this.pSpeed;
-    this.r      = this.baseR + Math.sin(this.phase) * this.baseR * 0.16;
-    this.color.h = (this.color.h + 0.05) % 360;
-    this.life  -= this.decay;
-    if (this.life <= 0 || this.y < -100) this.init();
-  }
-  draw() {
-    const { h, s, l } = this.color;
-    const a = this.alpha * this.life;
-    const grd = ctx.createRadialGradient(
-      this.x - this.r*0.28, this.y - this.r*0.28, this.r*0.04,
-      this.x, this.y, this.r
-    );
-    grd.addColorStop(0,   `hsla(${h},${s}%,${l+12}%,${a*0.85})`);
-    grd.addColorStop(0.55,`hsla(${h},${s}%,${l}%,${a*0.5})`);
-    grd.addColorStop(1,   `hsla(${h},${s}%,${l-8}%,0)`);
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
-    ctx.fillStyle = grd; ctx.fill();
-    // rim
-    ctx.strokeStyle = `hsla(${h},${s}%,${l+8}%,${a*0.35})`;
-    ctx.lineWidth = 0.7; ctx.stroke();
-    // specular
-    ctx.beginPath();
-    ctx.arc(this.x - this.r*0.27, this.y - this.r*0.27, this.r*0.17, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(255,255,255,${a*0.6})`; ctx.fill();
+/* ── pointer (mouse + touch, works on mobile) ── */
+let pointer = { x: -9999, y: -9999 };
+window.addEventListener('mousemove', e => { pointer.x = e.clientX; pointer.y = e.clientY; });
+window.addEventListener('touchmove', e => {
+  if (e.touches[0]) { pointer.x = e.touches[0].clientX; pointer.y = e.touches[0].clientY; }
+}, { passive: true });
+window.addEventListener('touchstart', e => {
+  if (e.touches[0]) { pointer.x = e.touches[0].clientX; pointer.y = e.touches[0].clientY; }
+}, { passive: true });
+
+/* ══ SCENE 1 · HERO — calm starfield ══ */
+let stars = [];
+function initStars() {
+  stars = [];
+  const n = Math.floor((W * H) / 8500);
+  for (let i = 0; i < n; i++) {
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.5,
+      tw: Math.random() * Math.PI * 2,
+      twSpeed: Math.random() * 0.02 + 0.008,
+      hue: [235, 280, 330][Math.floor(Math.random() * 3)]
+    });
   }
 }
-
-/* ── PARTICLES ── */
-class Particle {
-  constructor() { this.init(true); }
-  init(first = false) {
-    this.x     = Math.random() * W;
-    this.y     = first ? Math.random() * H : H + 5;
-    this.vx    = (Math.random() - 0.5) * 0.28;
-    this.vy    = -(Math.random() * 0.38 + 0.08);
-    this.r     = Math.random() * 1.6 + 0.4;
-    this.color = randColor();
-    this.life  = 1;
-    this.decay = Math.random() * 0.0018 + 0.0008;
-  }
-  update() {
-    const dx = this.x - mouse.x, dy = this.y - mouse.y;
-    const d  = Math.sqrt(dx*dx + dy*dy);
-    if (d < 80) { this.vx += (dx/d)*0.045; this.vy += (dy/d)*0.045; }
-    this.x += this.vx; this.y += this.vy;
-    this.color.h = (this.color.h + 0.07) % 360;
-    this.life  -= this.decay;
-    if (this.life <= 0 || this.y < -5) this.init();
-  }
-  draw() {
-    const { h, s, l } = this.color;
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
-    ctx.fillStyle = `hsla(${h},${s}%,${l}%,${this.life*0.5})`; ctx.fill();
-  }
+function drawHero() {
+  stars.forEach(s => {
+    s.tw += s.twSpeed;
+    const a  = 0.3 + Math.sin(s.tw) * 0.22;
+    const px = s.x + (pointer.x - W / 2) * 0.012;
+    const py = s.y + (pointer.y - H / 2) * 0.012;
+    ctx.beginPath(); ctx.arc(px, py, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${s.hue},65%,52%,${a})`;
+    ctx.fill();
+  });
 }
 
-/* ── Connections ── */
-function drawConnections(parts) {
-  for (let i = 0; i < parts.length; i++) {
-    for (let j = i+1; j < parts.length; j++) {
-      const dx = parts[i].x-parts[j].x, dy = parts[i].y-parts[j].y;
-      const d  = Math.sqrt(dx*dx+dy*dy);
-      if (d < 85) {
-        const a = (1-d/85)*0.07*Math.min(parts[i].life,parts[j].life);
-        ctx.beginPath();
-        ctx.moveTo(parts[i].x,parts[i].y); ctx.lineTo(parts[j].x,parts[j].y);
-        ctx.strokeStyle=`hsla(240,60%,60%,${a})`; ctx.lineWidth=0.5; ctx.stroke();
+/* ══ SCENE 2 · ABOUT — Big Bang ══ */
+let bbParticles = [], bbFlash = 0;
+function initBigBang() {
+  bbParticles = [];
+  for (let i = 0; i < 170; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 2.4 + 0.5;
+    bbParticles.push({
+      x: W / 2, y: H / 2,
+      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
+      r: Math.random() * 2 + 0.6,
+      hue: [40, 320, 260, 205][Math.floor(Math.random() * 4)]
+    });
+  }
+  bbFlash = 1;
+}
+function drawBigBang() {
+  if (bbFlash > 0.01) {
+    bbFlash *= 0.965;
+    const rad = 230 * bbFlash + 20;
+    const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, rad);
+    g.addColorStop(0,   `rgba(255,248,232,${0.5 * bbFlash})`);
+    g.addColorStop(0.4, `rgba(255,200,150,${0.24 * bbFlash})`);
+    g.addColorStop(1,   'rgba(255,200,150,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(W / 2, H / 2, rad, 0, Math.PI * 2); ctx.fill();
+  }
+  bbParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.9965; p.vy *= 0.9965; // decelerate then drift forever (expanding universe)
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue},70%,58%,0.55)`;
+    ctx.fill();
+  });
+}
+
+/* ══ SCENE 3 · PROJECTS — drifting planets ══ */
+let planets = [];
+function initPlanets() {
+  const defs = [
+    { hue: 240, r: 46, ring: true  },
+    { hue: 330, r: 32, ring: false },
+    { hue: 160, r: 38, ring: false },
+    { hue: 205, r: 52, ring: true  },
+    { hue: 38,  r: 26, ring: false },
+  ];
+  planets = defs.map((d, i) => ({
+    x: (W / (defs.length + 1)) * (i + 1) + (Math.random() - 0.5) * 50,
+    y: H * (0.22 + Math.random() * 0.5),
+    r: d.r, hue: d.hue, ring: d.ring,
+    vx: (Math.random() - 0.5) * 0.14,
+    bob: Math.random() * Math.PI * 2,
+    scale: 0
+  }));
+}
+function drawPlanets() {
+  planets.forEach(p => {
+    p.scale = Math.min(1, p.scale + 0.018); // grow-in = size shift on entry
+    p.bob += 0.006;
+    p.x += p.vx;
+    if (p.x < -90) p.x = W + 90;
+    if (p.x > W + 90) p.x = -90;
+    const y = p.y + Math.sin(p.bob) * 14;
+    const r = p.r * p.scale;
+    if (p.ring) {
+      ctx.save();
+      ctx.translate(p.x, y); ctx.rotate(-0.35); ctx.scale(1, 0.35);
+      ctx.beginPath(); ctx.arc(0, 0, r * 1.75, 0, Math.PI * 2);
+      ctx.strokeStyle = `hsla(${p.hue},50%,65%,0.3)`; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
+    }
+    const g = ctx.createRadialGradient(p.x - r * 0.3, y - r * 0.3, r * 0.1, p.x, y, r);
+    g.addColorStop(0, `hsla(${p.hue},55%,68%,0.85)`);
+    g.addColorStop(1, `hsla(${p.hue},50%,42%,0.5)`);
+    ctx.beginPath(); ctx.arc(p.x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = g; ctx.fill();
+  });
+}
+
+/* ══ SCENE 4 · SKILLS — constellation network ══ */
+let constNodes = [];
+function initConst() {
+  constNodes = [];
+  const n = Math.floor((W * H) / 32000);
+  for (let i = 0; i < n; i++) {
+    constNodes.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+      r: Math.random() * 1.6 + 0.9
+    });
+  }
+}
+function drawConst() {
+  constNodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  });
+  for (let i = 0; i < constNodes.length; i++) {
+    for (let j = i + 1; j < constNodes.length; j++) {
+      const a = constNodes[i], b = constNodes[j];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < 130) {
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `hsla(240,50%,52%,${(1 - d / 130) * 0.22})`;
+        ctx.lineWidth = 0.6; ctx.stroke();
       }
     }
   }
+  constNodes.forEach(n => {
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'hsla(240,55%,52%,0.55)'; ctx.fill();
+  });
 }
 
-/* ── Soft gradient wash (changes hue on scroll) ── */
-let scrollHue = 0;
-function drawBgWash() {
-  const g = ctx.createLinearGradient(0,0,W,H);
-  const h = scrollHue;
-  g.addColorStop(0,   `hsla(${h},60%,95%,0.3)`);
-  g.addColorStop(0.5, `hsla(${(h+40)%360},55%,97%,0.15)`);
-  g.addColorStop(1,   `hsla(${(h+80)%360},60%,95%,0.3)`);
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+/* ══ SCENE 5 · EXPERIENCE — meteor trail timeline ══ */
+let meteors = [], meteorTimer = 0;
+function initMeteors() { meteors = []; meteorTimer = 0; }
+function spawnMeteor() {
+  meteors.push({
+    x: Math.random() * W * 0.7, y: -20,
+    vx: 3 + Math.random() * 2, vy: 2 + Math.random() * 1.4,
+    len: 70 + Math.random() * 60,
+    hue: [205, 320, 38][Math.floor(Math.random() * 3)]
+  });
+}
+function drawMeteors() {
+  meteorTimer++;
+  if (meteorTimer > 50) { spawnMeteor(); meteorTimer = 0; }
+  meteors.forEach(m => {
+    m.x += m.vx; m.y += m.vy;
+    const tx = m.x - m.vx * m.len / 3, ty = m.y - m.vy * m.len / 3;
+    const grad = ctx.createLinearGradient(m.x, m.y, tx, ty);
+    grad.addColorStop(0, `hsla(${m.hue},70%,58%,0.6)`);
+    grad.addColorStop(1, `hsla(${m.hue},70%,58%,0)`);
+    ctx.strokeStyle = grad; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tx, ty); ctx.stroke();
+  });
+  meteors = meteors.filter(m => m.y < H + 50 && m.x < W + 50);
 }
 
-let bubbles=[], particles2=[];
-function initAll() {
-  bubbles=[]; particles2=[];
-  const nb = Math.floor((W*H)/26000);
-  const np = Math.floor((W*H)/10000);
-  for (let i=0;i<nb;i++) bubbles.push(new Bubble());
-  for (let i=0;i<np;i++) particles2.push(new Particle());
+/* ══ SCENE 6 · POR — orbit rings (leadership = things revolving around you) ══ */
+let orbitAngle = 0;
+function drawOrbit() {
+  orbitAngle += 0.0045;
+  const cx = W * 0.78, cy = H * 0.32;
+  const colors = ['#6366F1', '#EC4899', '#10B981'];
+  [70, 112, 152].forEach((rad, i) => {
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    ctx.strokeStyle = 'hsla(240,45%,52%,0.14)'; ctx.lineWidth = 1; ctx.stroke();
+    const ang = orbitAngle * (i % 2 === 0 ? 1 : -1) * (1 + i * 0.25);
+    const sx = cx + Math.cos(ang) * rad, sy = cy + Math.sin(ang) * rad * 0.92;
+    ctx.beginPath(); ctx.arc(sx, sy, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i]; ctx.globalAlpha = 0.55; ctx.fill(); ctx.globalAlpha = 1;
+  });
 }
-initAll();
+
+/* ══ SCENE 7 · BEYOND — soft nebula waves (creative side) ══ */
+let nebulaT = 0;
+function drawNebula() {
+  nebulaT += 0.004;
+  [280, 330, 200].forEach((hue, i) => {
+    const yBase = H * 0.28 + i * H * 0.22;
+    ctx.beginPath(); ctx.moveTo(0, yBase);
+    for (let x = 0; x <= W; x += 40) {
+      const y = yBase + Math.sin(x * 0.01 + nebulaT * 2 + i) * 26;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+    ctx.fillStyle = `hsla(${hue},50%,72%,0.045)`;
+    ctx.fill();
+  });
+}
+
+/* ══ SCENE 8 · CONTACT — particles converge into a warm invite ══ */
+let convergeParticles = [];
+function initConverge() {
+  convergeParticles = [];
+  for (let i = 0; i < 60; i++) {
+    convergeParticles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      hue: [240, 330, 38][Math.floor(Math.random() * 3)]
+    });
+  }
+}
+function drawConverge() {
+  const cx = W / 2, cy = H * 0.42;
+  convergeParticles.forEach(p => {
+    p.x += (cx - p.x) * 0.0045;
+    p.y += (cy - p.y) * 0.0045;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 1.7, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue},60%,55%,0.5)`; ctx.fill();
+  });
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
+  g.addColorStop(0, 'rgba(255,238,200,0.16)');
+  g.addColorStop(1, 'rgba(255,238,200,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 150, 0, Math.PI * 2); ctx.fill();
+}
+
+/* ══ SCENE MANAGER — driven by which section is on screen ══ */
+let currentScene = 'hero';
+let sceneStart = performance.now();
+function initSceneState(name) {
+  if (name === 'about')     initBigBang();
+  if (name === 'projects')  initPlanets();
+  if (name === 'experience') initMeteors();
+  if (name === 'contact')   initConverge();
+}
+function setScene(name) {
+  if (name === currentScene) return;
+  currentScene = name;
+  sceneStart = performance.now();
+  initSceneState(name);
+}
+
+resize();
+window.addEventListener('resize', resize);
+initSceneState('hero');
+
+const sectionIds = ['hero','about','projects','skills','experience','por','beyond','contact'];
+const sceneObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.35) setScene(e.target.id);
+  });
+}, { threshold: [0.35, 0.5, 0.65] });
+sectionIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) sceneObserver.observe(el);
+});
 
 function animate() {
-  ctx.clearRect(0,0,W,H);
-  drawBgWash();
-  bubbles.forEach(b=>{b.update();b.draw();});
-  drawConnections(particles2);
-  particles2.forEach(p=>{p.update();p.draw();});
+  ctx.clearRect(0, 0, W, H);
+  switch (currentScene) {
+    case 'hero':       drawHero();     break;
+    case 'about':      drawBigBang();  break;
+    case 'projects':   drawPlanets();  break;
+    case 'skills':     drawConst();    break;
+    case 'experience': drawMeteors();  break;
+    case 'por':        drawOrbit();    break;
+    case 'beyond':     drawNebula();   break;
+    case 'contact':    drawConverge(); break;
+  }
   requestAnimationFrame(animate);
 }
-animate();
+requestAnimationFrame(animate);
 
-/* ══ SCROLL — hue shift + progress bar ══ */
+/* ══ SCROLL PROGRESS BAR ══ */
 const scrollBar = document.getElementById('scroll-bar');
-
 window.addEventListener('scroll', () => {
-  const max    = document.body.scrollHeight - window.innerHeight;
-  const ratio  = max > 0 ? window.scrollY / max : 0;
-  // hue sweeps 0→200 as you scroll (indigo→green range — all easy on eyes)
-  scrollHue    = ratio * 200;
-  // also shift body background subtly
-  document.body.style.background =
-    `hsl(${220 + ratio*40},${60-ratio*15}%,${96-ratio*4}%)`;
-  // progress bar
-  scrollBar.style.width = (ratio*100).toFixed(1)+'%';
+  const max   = document.body.scrollHeight - window.innerHeight;
+  const ratio = max > 0 ? window.scrollY / max : 0;
+  scrollBar.style.width = (ratio * 100).toFixed(1) + '%';
 }, { passive: true });
 
-/* ══ SCROLL REVEAL ══ */
+/* ══ SCROLL REVEAL (fade + slide in) ══ */
 const revealObs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ══ CONTINUOUS SIZE-SHIFT ON SCROLL ══
+   Elements nearer the vertical center of the viewport sit at their
+   full size; elements further away shrink slightly. Subtle, not jarring. */
+const scaleTargets = Array.from(document.querySelectorAll('.reveal'));
+function updateSizeShift() {
+  const vh = window.innerHeight;
+  const center = vh / 2;
+  scaleTargets.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const elCenter = rect.top + rect.height / 2;
+    const norm = Math.min(1, Math.abs(elCenter - center) / (vh * 0.75));
+    const scale = 1.025 - norm * 0.08; // ~0.945 to 1.025
+    el.style.setProperty('--rs', scale.toFixed(3));
+  });
+  requestAnimationFrame(updateSizeShift);
+}
+requestAnimationFrame(updateSizeShift);
 </script>
 </body>
 </html>
