@@ -15,6 +15,7 @@
       --a3:     #00C27B;   /* vivid green     */
       --a4:     #FF9500;   /* orange          */
       --a5:     #0099FF;   /* electric blue   */
+      --a6:     #0FB5AE;   /* teal — agentic ai */
       --text:   #111111;
       --muted:  #666666;
       --card:   #FFFFFF;
@@ -159,72 +160,64 @@
     }
     .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
 
-    /* ══ PROJECTS GRID ══ */
+    /* ══ PROJECTS GRID — filled color-box cards ══ */
     .projects-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 1.5rem; }
     .project-card {
-      background: var(--card);
-      border-radius: 20px; padding: 1.75rem;
+      --card-c: var(--a1);
+      background: color-mix(in srgb, var(--card-c) 7%, #FFFFFF);
+      border-radius: 18px; padding: 1.75rem;
       position: relative; overflow: hidden;
       display: flex; flex-direction: column;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-      border: 1.5px solid transparent;
-      background-clip: padding-box;
+      border: 1px solid color-mix(in srgb, var(--card-c) 22%, transparent);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 6px 18px color-mix(in srgb, var(--card-c) 10%, transparent);
       transition: transform 0.4s cubic-bezier(0.22,1,0.36,1),
-                  box-shadow 0.4s ease;
-    }
-    .project-card::after {
-      content: ''; position: absolute; inset: 0;
-      border-radius: 20px; pointer-events: none;
-      border: 1.5px solid rgba(0,0,0,0.07);
-      transition: border-color 0.3s;
+                  box-shadow 0.4s ease, border-color 0.3s ease;
     }
     .project-card:hover {
       transform: translateY(-6px) scale(1.012);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.07);
+      border-color: color-mix(in srgb, var(--card-c) 45%, transparent);
+      box-shadow: 0 24px 60px color-mix(in srgb, var(--card-c) 22%, transparent), 0 8px 24px rgba(0,0,0,0.06);
     }
-    .project-card:hover::after { border-color: transparent; }
-    /* colored left accent bar */
+    /* top color block instead of thin left bar — reads as a filled, categorized box */
     .project-card::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 4px; height: 100%;
-      border-radius: 20px 0 0 20px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: var(--card-c);
+      border-radius: 18px 18px 0 0;
     }
-    .card-v::before  { background: linear-gradient(180deg, var(--a1), var(--a2)); }
-    .card-cv::before { background: linear-gradient(180deg, var(--a5), var(--a1)); }
-    .card-as::before { background: linear-gradient(180deg, var(--a3), var(--a5)); }
-    .card-nl::before { background: linear-gradient(180deg, var(--a4), var(--a3)); }
-    .card-rg::before { background: linear-gradient(180deg, var(--a2), var(--a4)); }
+    .card-v  { --card-c: var(--a1); }
+    .card-cv { --card-c: var(--a5); }
+    .card-as { --card-c: var(--a3); }
+    .card-nl { --card-c: var(--a4); }
+    .card-rg { --card-c: var(--a2); }
+    .card-ag { --card-c: var(--a6); }
 
     .card-num {
       position: absolute; top: 1.25rem; right: 1.5rem;
       font-family: 'Space Mono', monospace; font-size: 3rem; font-weight: 700;
-      color: rgba(99,102,241,0.06); pointer-events: none;
+      color: color-mix(in srgb, var(--card-c) 12%, transparent); pointer-events: none;
     }
     .project-tag {
       display: inline-block; font-size: 0.67rem;
       font-family: 'Space Mono', monospace; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 0.2rem 0.65rem;
-      border-radius: 4px; margin-bottom: 1rem; width: fit-content;
+      text-transform: uppercase; padding: 0.28rem 0.7rem;
+      border-radius: 5px; margin-bottom: 1rem; width: fit-content;
+      background: var(--card-c); color: #fff; font-weight: 700;
     }
-    .tag-v  { background: rgba(99,102,241,0.09);  color: var(--a1); }
-    .tag-cv { background: rgba(59,130,246,0.09);  color: var(--a5); }
-    .tag-as { background: rgba(16,185,129,0.09);  color: var(--a3); }
-    .tag-nl { background: rgba(245,158,11,0.09);  color: var(--a4); }
-    .tag-rg { background: rgba(236,72,153,0.09);  color: var(--a2); }
 
     .project-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.65rem; line-height: 1.3; color: var(--text); }
     .project-desc { color: var(--muted); font-size: 0.83rem; line-height: 1.75; margin-bottom: 1rem; flex: 1; }
     .project-stack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1rem; }
     .stack-tag {
       font-size: 0.66rem; font-family: 'Space Mono', monospace;
-      color: var(--muted); border: 1px solid var(--border);
+      color: color-mix(in srgb, var(--card-c) 75%, #000000);
+      border: 1px solid color-mix(in srgb, var(--card-c) 30%, transparent);
       padding: 0.12rem 0.45rem; border-radius: 4px;
-      background: rgba(99,102,241,0.03);
+      background: color-mix(in srgb, var(--card-c) 9%, #FFFFFF);
     }
     .project-links { display: flex; gap: 0.75rem; margin-top: auto; }
     .project-link {
-      font-size: 0.78rem; color: var(--a1); text-decoration: none;
-      display: flex; align-items: center; gap: 0.3rem; transition: opacity 0.2s; font-weight: 500;
+      font-size: 0.78rem; color: var(--card-c); text-decoration: none;
+      display: flex; align-items: center; gap: 0.3rem; transition: opacity 0.2s; font-weight: 600;
     }
     .project-link:hover { opacity: 0.65; }
 
@@ -342,12 +335,14 @@
     .projects-grid .reveal:nth-child(5) { transition-delay: 0.33s; }
     .projects-grid .reveal:nth-child(6) { transition-delay: 0.40s; }
     .projects-grid .reveal:nth-child(7) { transition-delay: 0.47s; }
+    .projects-grid .reveal:nth-child(8) { transition-delay: 0.54s; }
     .skills-grid .reveal:nth-child(1)   { transition-delay: 0.05s; }
     .skills-grid .reveal:nth-child(2)   { transition-delay: 0.12s; }
     .skills-grid .reveal:nth-child(3)   { transition-delay: 0.19s; }
     .skills-grid .reveal:nth-child(4)   { transition-delay: 0.26s; }
     .skills-grid .reveal:nth-child(5)   { transition-delay: 0.33s; }
     .skills-grid .reveal:nth-child(6)   { transition-delay: 0.40s; }
+    .skills-grid .reveal:nth-child(7)   { transition-delay: 0.47s; }
 
     /* ══ SCROLL PROGRESS BAR ══ */
     #scroll-bar {
@@ -435,13 +430,13 @@
     <div class="about-grid">
       <div class="about-text">
         <p>I'm a <span>4th year B.Tech student in Space Science & Engineering</span> at IIT Indore — one of the rare engineers who moves fluidly across the AI stack: from fine-tuning LLMs and building Generative AI pipelines to deploying computer vision systems and voice intelligence at production scale.</p>
-        <p>My work spans <span>Generative AI, LLMs, RAG pipelines, NLP, voice intelligence, and computer vision</span>. I don't just study models — I design, train, and ship them end to end with real metrics to show for it.</p>
+        <p>My work spans <span>Generative AI, LLMs, RAG pipelines, agentic AI systems, NLP, voice intelligence, and computer vision</span>. I don't just study models — I design, train, and ship them end to end with real metrics to show for it.</p>
         <p>Currently doing my <span>B.Tech Project early</span> (Animal Detection & Collision Prevention for Indian Railways), building a freelance ML portfolio, and preparing for high-impact placements in AI/ML.</p>
         <p>Beyond code — I am an active member of <span>Aaina, IIT Indore's Dramatics Club</span>, and served as <span>General Secretary Culturals</span> at Student Gymkhana. The stage taught me what most engineers miss: how to communicate, lead, and hold a room.</p>
       </div>
       <div class="about-stats">
         <div class="stat-card reveal"><div class="stat-num">7.23</div><div class="stat-label">CPI · IIT Indore</div></div>
-        <div class="stat-card reveal"><div class="stat-num">7+</div><div class="stat-label">End-to-end ML projects</div></div>
+        <div class="stat-card reveal"><div class="stat-num">8+</div><div class="stat-label">End-to-end ML projects</div></div>
       </div>
     </div>
   </div>
@@ -458,7 +453,7 @@
 
       <div class="project-card card-rg reveal">
         <span class="card-num">01</span>
-        <span class="project-tag tag-rg">RAG · Gen AI</span>
+        <span class="project-tag">RAG · Gen AI</span>
         <div class="project-title">Coursemate — RAG App with LangChain & Mistral AI</div>
         <div class="project-desc">Full RAG pipeline supporting text, PDF, and web sources. Chunks documents, generates semantic embeddings, stores in ChromaDB, and retrieves relevant context before generating answers with Mistral AI. Modular architecture with secure env-based API management.</div>
         <div class="project-stack">
@@ -471,7 +466,7 @@
 
       <div class="project-card card-v reveal">
         <span class="card-num">02</span>
-        <span class="project-tag tag-v">Voice AI</span>
+        <span class="project-tag">Voice AI</span>
         <div class="project-title">BFSI Voice Emotion Detection Pipeline</div>
         <div class="project-desc">Real-time speaker-independent emotion detection for Indian BFSI debt collection calls. Trained on South Asian speech with 8kHz codec simulation. Escalation logic triggers at >60% distress confidence across 3 consecutive chunks.</div>
         <div class="project-stack">
@@ -483,7 +478,7 @@
 
       <div class="project-card card-v reveal">
         <span class="card-num">03</span>
-        <span class="project-tag tag-v">Speaker Intelligence</span>
+        <span class="project-tag">Speaker Intelligence</span>
         <div class="project-title">Speaker Verification & Gender Classification</div>
         <div class="project-desc">ECAPA-TDNN pipeline on 132-speaker Hindi multi-accent dataset (12.5 hrs). 100% F1-score on gender classification. t-SNE/UMAP visualizations show clear cluster separability. Deployed as live Gradio demo with real-time threshold tuning.</div>
         <div class="project-stack">
@@ -495,7 +490,7 @@
 
       <div class="project-card card-cv reveal">
         <span class="card-num">04</span>
-        <span class="project-tag tag-cv">Computer Vision</span>
+        <span class="project-tag">Computer Vision</span>
         <div class="project-title">Water Bridge Detection — YOLOv8</div>
         <div class="project-desc">Object detection pipeline for water bridge identification from satellite/remote sensing imagery. YOLOv8 on DOTA dataset achieving 58% mAP. OpenCV preprocessing + Hugging Face model management. GLH-Water identified as higher-accuracy alternative.</div>
         <div class="project-stack">
@@ -507,7 +502,7 @@
 
       <div class="project-card card-as reveal">
         <span class="card-num">05</span>
-        <span class="project-tag tag-as">Astrophysics · ML</span>
+        <span class="project-tag">Astrophysics · ML</span>
         <div class="project-title">QPO Detection in X-Ray Binaries</div>
         <div class="project-desc">ML pipeline for detecting Quasi-Periodic Oscillations from noisy NASA astrophysical datasets. Signal feature extraction and classification across 500+ power spectra with explicit focus on false positive reduction. Under Prof. Manoneeta Chakraborty.</div>
         <div class="project-stack">
@@ -519,7 +514,7 @@
 
       <div class="project-card card-nl reveal">
         <span class="card-num">06</span>
-        <span class="project-tag tag-nl">Gen AI · LLM</span>
+        <span class="project-tag">Gen AI · LLM</span>
         <div class="project-title">Gemma 3n Mental Health Voice Chatbot</div>
         <div class="project-desc">Voice-first mental health chatbot with real-time LLM-based emotional classification using Gemma 3n. Reduced response latency by ~25% via stacked memory architecture. Built for Google DeepMind Hackathon.</div>
         <div class="project-stack">
@@ -531,12 +526,24 @@
 
       <div class="project-card card-cv reveal">
         <span class="card-num">07</span>
-        <span class="project-tag tag-cv">Railways · CV</span>
+        <span class="project-tag">Railways · CV</span>
         <div class="project-title">Animal Detection & Collision Prevention</div>
         <div class="project-desc">B.Tech Project — YOLOv8-nano achieving ~81.5% mAP50 on ~9,300 wildlife images. Full stack: SQLite + FastAPI + Streamlit dashboard with real-time visual alert system for Indian railway safety automation.</div>
         <div class="project-stack">
           <span class="stack-tag">YOLOv8-nano</span><span class="stack-tag">FastAPI</span>
           <span class="stack-tag">SQLite</span><span class="stack-tag">Streamlit</span><span class="stack-tag">OpenCV</span>
+        </div>
+        <div class="project-links"><a href="https://github.com/Ap00rv-1" target="_blank" class="project-link">↗ GitHub</a></div>
+      </div>
+
+      <div class="project-card card-ag reveal">
+        <span class="card-num">08</span>
+        <span class="project-tag">Agentic AI</span>
+        <div class="project-title">City Intelligence Agent — Tool-Calling & HITL</div>
+        <div class="project-desc">Two agentic implementations of a live weather + news assistant: one using LangChain's high-level create_agent, and a hand-rolled ReAct-style loop with bind_tools, explicit tool-call routing, and a human-in-the-loop approval gate before any tool executes.</div>
+        <div class="project-stack">
+          <span class="stack-tag">LangChain Agents</span><span class="stack-tag">Tool Calling</span>
+          <span class="stack-tag">Mistral AI</span><span class="stack-tag">Tavily API</span><span class="stack-tag">Human-in-the-Loop</span>
         </div>
         <div class="project-links"><a href="https://github.com/Ap00rv-1" target="_blank" class="project-link">↗ GitHub</a></div>
       </div>
@@ -560,6 +567,15 @@
           <span class="skill-chip">LangChain</span><span class="skill-chip">Mistral AI</span>
           <span class="skill-chip">Prompt Engineering</span><span class="skill-chip">FAISS</span>
           <span class="skill-chip">Llama</span><span class="skill-chip">Gemma</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <div class="skill-group-title">AI Agents & Tool Use</div>
+        <div class="skill-tags">
+          <span class="skill-chip">AI Agents</span><span class="skill-chip">Tool / Function Calling</span>
+          <span class="skill-chip">Human-in-the-Loop Systems</span>
+          <span class="skill-chip">LangChain Agents</span><span class="skill-chip">Tavily API</span>
+          <span class="skill-chip">Multi-tool Orchestration</span>
         </div>
       </div>
       <div class="skill-group reveal">
@@ -717,7 +733,7 @@
     <p class="section-label">// 07 · Contact</p>
     <h2>Let's Connect</h2>
     <div class="contact-inner">
-      <p>Open to ML engineering roles, AI research, and hard problems across Generative AI, LLMs, RAG systems, computer vision, and voice systems. If you're building something ambitious — let's talk.</p>
+      <p>Open to ML engineering roles, AI research, and hard problems across Generative AI, LLMs, RAG systems, agentic AI, computer vision, and voice systems. If you're building something ambitious — let's talk.</p>
       <div class="contact-links">
         <a href="mailto:sse230021004@iiti.ac.in" class="btn btn-primary">Email Me →</a>
         <a href="https://www.linkedin.com/in/apoorv-singh-18758b287/" target="_blank" class="btn btn-outline">LinkedIn</a>
