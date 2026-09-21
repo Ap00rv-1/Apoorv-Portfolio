@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Apoorv Singh — ML Engineer & AI Builder</title>
+  <title>Apoorv Singh — Data Analytics, AI & ML</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
@@ -159,6 +159,45 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ══ BUSINESS ANALYTICS FOCUS ══ */
+    .analytics-focus {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .analytics-focus-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--a1);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .analytics-focus-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .analytics-focus-grid > div {
+      padding: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(91,75,245,0.025);
+    }
+    .analytics-focus-grid strong {
+      display: block;
+      font-size: 0.88rem;
+      margin-bottom: 0.25rem;
+    }
+    .analytics-focus-grid span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.73rem;
+      line-height: 1.5;
+    }
 
     /* ══ PROJECTS GRID — filled color-box cards ══ */
     .projects-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap: 1.5rem; }
@@ -367,6 +406,7 @@
       .beyond-inner { grid-template-columns: 1fr; }
       .timeline-item { grid-template-columns: 70px 1px 1fr; gap: 0 1rem; }
       .projects-grid { grid-template-columns: 1fr; }
+      .analytics-focus-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -397,11 +437,11 @@
       <div>
         <p class="hero-tag">IIT Indore · Space Science & Engineering</p>
         <h1>Apoorv<br>Singh</h1>
-        <p class="hero-sub">ML Engineer · Generative AI · Voice & Vision Systems</p>
+        <p class="hero-sub">Data Analytics · AI · Generative AI · ML Systems</p>
         <p class="hero-desc">
-          I build AI systems that work in the real world — from deploying voice agents and training
-          computer vision models to generative AI and RAG pipelines. Space Science background.
-          ML obsession. Shipping mindset.
+          I build data-driven systems end to end — from SQL-based analysis and business insights to
+          machine learning, Generative AI, and production-ready applications. I enjoy turning messy
+          problems into structured analysis, measurable insights, and practical solutions.
         </p>
         <div class="hero-ctas">
           <a href="#projects" class="btn btn-primary">View Projects →</a>
@@ -430,14 +470,25 @@
     <h2>Who I Am</h2>
     <div class="about-grid">
       <div class="about-text">
-        <p>I'm a <span>4th year B.Tech student in Space Science & Engineering</span> at IIT Indore — one of the rare engineers who moves fluidly across the AI stack: from fine-tuning LLMs and building Generative AI pipelines to deploying computer vision systems and voice intelligence at production scale.</p>
-        <p>My work spans <span>Generative AI, LLMs, RAG pipelines, agentic AI systems, NLP, voice intelligence, and computer vision</span>. I don't just study models — I design, train, and ship them end to end with real metrics to show for it.</p>
-        <p>Currently doing my <span>B.Tech Project early</span> (Animal Detection & Collision Prevention for Indian Railways), building a freelance ML portfolio, and preparing for high-impact placements in AI/ML.</p>
-        <p>Beyond code — I am an active member of <span>Aaina, IIT Indore's Dramatics Club</span>, and served as <span>General Secretary Culturals</span> at Student Gymkhana. The stage taught me what most engineers miss: how to communicate, lead, and hold a room.</p>
+        <p>I'm a <span>4th year B.Tech student in Space Science & Engineering</span> at IIT Indore, with experience spanning machine learning, Generative AI, data analysis, and production-oriented software systems.</p>
+        <p>Alongside AI/ML, I work with <span>SQL, Excel, data analysis, statistics, and data visualization</span> to turn structured and unstructured data into insights that can support business decisions. I enjoy breaking ambiguous problems into measurable metrics, identifying patterns, and communicating findings clearly.</p>
+        <p>My technical work spans <span>Generative AI, LLMs, RAG pipelines, agentic AI systems, NLP, voice intelligence, computer vision, and data-driven applications</span>. I build end-to-end systems and evaluate them using meaningful performance metrics rather than treating models as isolated experiments.</p>
+        <p>Currently completing my <span>B.Tech Project on Animal Detection & Collision Prevention for Indian Railways</span>, building a freelance ML portfolio, and preparing for roles at the intersection of <span>data, analytics, AI, and business problem-solving</span>.</p>
+        <p>Beyond code — I am an active member of <span>Aaina, IIT Indore's Dramatics Club</span>, and served as <span>General Secretary Culturals</span> at Student Gymkhana. These experiences strengthened my communication, leadership, presentation, and stakeholder-facing skills.</p>
       </div>
       <div class="about-stats">
         <div class="stat-card reveal"><div class="stat-num">7.23</div><div class="stat-label">CPI · IIT Indore</div></div>
         <div class="stat-card reveal"><div class="stat-num">8+</div><div class="stat-label">End-to-end ML projects</div></div>
+      </div>
+    </div>
+
+    <div class="analytics-focus reveal" style="margin-top:2.5rem;">
+      <div class="analytics-focus-label">Business Analytics Focus</div>
+      <div class="analytics-focus-grid">
+        <div><strong>Analyze</strong><span>SQL · Excel · Python · Statistics</span></div>
+        <div><strong>Visualize</strong><span>Dashboards · Trends · KPIs · Data Storytelling</span></div>
+        <div><strong>Decide</strong><span>Problem Decomposition · Root Cause · Insights</span></div>
+        <div><strong>Build</strong><span>ML · GenAI · APIs · Data-Driven Applications</span></div>
       </div>
     </div>
   </div>
@@ -529,7 +580,7 @@
         <span class="card-num">07</span>
         <span class="project-tag">Railways · CV</span>
         <div class="project-title">Animal Detection & Collision Prevention</div>
-        <div class="project-desc">B.Tech Project — YOLOv8-nano achieving ~81.5% mAP50 on ~9,300 wildlife images. Full stack: SQLite + FastAPI + Streamlit dashboard with real-time visual alert system for Indian railway safety automation.</div>
+        <div class="project-desc">B.Tech Project — YOLOv8-nano achieving ~81.5% mAP50 on ~9,300 wildlife images. Full stack: SQLite + FastAPI + Streamlit dashboard for real-time visual alerts, event logging, and operational monitoring for Indian railway safety automation.</div>
         <div class="project-stack">
           <span class="stack-tag">YOLOv8-nano</span><span class="stack-tag">FastAPI</span>
           <span class="stack-tag">SQLite</span><span class="stack-tag">Streamlit</span><span class="stack-tag">OpenCV</span>
@@ -573,6 +624,18 @@
     <p class="section-label">// 03 · Skills</p>
     <h2>Technical Stack</h2>
     <div class="skills-grid">
+      <div class="skill-group reveal">
+        <div class="skill-group-title">Business Analytics & Data</div>
+        <div class="skill-tags">
+          <span class="skill-chip">SQL</span><span class="skill-chip">Excel</span>
+          <span class="skill-chip">Data Analysis</span><span class="skill-chip">Statistics</span>
+          <span class="skill-chip">KPI Analysis</span><span class="skill-chip">Data Visualization</span>
+          <span class="skill-chip">Power BI</span><span class="skill-chip">Exploratory Data Analysis</span>
+          <span class="skill-chip">Data Storytelling</span>
+          <span class="skill-chip">Pandas</span><span class="skill-chip">NumPy</span>
+        </div>
+      </div>
+
       <div class="skill-group reveal">
         <div class="skill-group-title">Generative AI & NLP</div>
         <div class="skill-tags">
@@ -619,12 +682,14 @@
         </div>
       </div>
       <div class="skill-group reveal">
-        <div class="skill-group-title">Data & Engineering</div>
+        <div class="skill-group-title">Data, BI & Engineering</div>
         <div class="skill-tags">
+          <span class="skill-chip">SQL / Oracle</span><span class="skill-chip">Excel</span>
+          <span class="skill-chip">Power BI</span><span class="skill-chip">Pandas</span><span class="skill-chip">NumPy</span>
+          <span class="skill-chip">Plotly</span><span class="skill-chip">EDA</span>
           <span class="skill-chip">FastAPI</span><span class="skill-chip">Streamlit</span>
-          <span class="skill-chip">Gradio</span><span class="skill-chip">SQL / Oracle</span>
-          <span class="skill-chip">Pandas</span><span class="skill-chip">NumPy</span>
-          <span class="skill-chip">Plotly</span><span class="skill-chip">Docker</span><span class="skill-chip">Web Scraping</span>
+          <span class="skill-chip">Gradio</span><span class="skill-chip">Docker</span>
+          <span class="skill-chip">REST APIs</span><span class="skill-chip">Web Scraping</span>
         </div>
       </div>
       <div class="skill-group reveal">
@@ -746,7 +811,7 @@
     <p class="section-label">// 07 · Contact</p>
     <h2>Let's Connect</h2>
     <div class="contact-inner">
-      <p>Open to ML engineering roles, AI research, and hard problems across Generative AI, LLMs, RAG systems, AI agents, computer vision, and voice systems. If you're building something ambitious — let's talk.</p>
+      <p>Open to Business Analytics, Data, AI/ML, and AI engineering roles. I enjoy solving ambiguous problems with data, building practical AI systems, and communicating technical insights in a way that supports real decisions.</p>
       <div class="contact-links">
         <a href="mailto:sse230021004@iiti.ac.in" class="btn btn-primary">Email Me →</a>
         <a href="https://www.linkedin.com/in/apoorv-singh-18758b287/" target="_blank" class="btn btn-outline">LinkedIn</a>
